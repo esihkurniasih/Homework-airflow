@@ -1,0 +1,34 @@
+from airflow import DAG
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
+from datetime import datetime, timedelta
+
+# Default arguments
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+}
+
+# Definisikan DAG
+dag = DAG(
+    'pyspark_wordcount',
+    default_args=default_args,
+    description='A simple PySpark DAG',
+    schedule_interval=timedelta(days=1),
+    start_date=datetime(2023, 1, 1),
+    catchup=False,
+)
+
+# Definisikan SparkSubmitOperator
+spark_submit_task = SparkSubmitOperator(
+    task_id='spark_submit_task',
+    application='/path/to/wordcount.py',  # Path ke skrip PySpark Anda
+    conn_id='spark_default',
+    dag=dag,
+)
+
+# Set task dependencies
+spark_submit_task
